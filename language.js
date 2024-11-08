@@ -19,8 +19,16 @@ function saveLanguage(language) {
     const transaction = db.transaction("sectionsStore", "readwrite");
     const objectStore = transaction.objectStore("sectionsStore");
 
-    // Enregistrez la langue avec un identifiant unique
+    // Sauvegarder la langue dans un enregistrement distinct
     objectStore.put({ id: "app_language", value: language });
+
+    transaction.oncomplete = function() {
+        console.log("Langue sauvegardée:", language);
+    };
+
+    transaction.onerror = function(event) {
+        console.error("Erreur lors de la sauvegarde de la langue:", event.target.errorCode);
+    };
 }
 
 function loadDefaultLanguageAndBookmarks() {

@@ -139,44 +139,46 @@ bookmarksData.sections.forEach((section) => {
 
 function renderBookmarks() {
     $('#bookmarkContainer').empty();
-    console.log("Rendu des bookmarks avec sections:", bookmarksData.sections);
-    
-    // Trier les sections par position
-    bookmarksData.sections.sort((a, b) => (a.position || 0) - (b.position || 0));
+  
+  // Tri des sections avant affichage pour garantir l'ordre
+  bookmarksData.sections.sort((a, b) => (a.position || 0) - (b.position || 0));
 
-    bookmarksData.sections.forEach((section) => {
-      const sectionHtml = `
-        <div class="col-lg-4 col-md-6 col-sm-12 mb-4 bookmark-section" id="${section.id}">
-          <div class="bookmark-title">${section.title}
+  // Rendu de chaque section sans ajout non voulu
+  bookmarksData.sections.forEach((section) => {
+    const sectionHtml = `
+      <div class="col-lg-4 col-md-6 col-sm-12 mb-4 bookmark-section" id="${section.id}">
+        <div class="bookmark-title">${section.title}
           <span class="edit-icon ml-2 editable" onclick="openEditSectionModal('${section.id}')">✏️</span>
           <span class="add-link-icon ml-2 editable" onclick="openAddLinkModal('${section.id}')">➕</span>
           <span class="delete-icon ml-2 editable" onclick="deleteSection('${section.id}')">🗑️</span>
-          </div>
-          <ul class="list-group sortable-links" id="links-${section.id}">
-            ${section.links.map((link, index) => `
-              <li class="list-group-item d-flex justify-content-between align-items-center" data-index="${index}" data-id="${link.id}">
-                <a href="${link.url}" style="padding-left: ${link.parentId ? '30px' : '0px'};">${link.title}</a>
-                <div>
-                  <span class="arrow-icon editable" onclick="moveLeft('${section.id}', ${index})">⬅️</span>
-                  <span class="arrow-icon editable" onclick="moveRight('${section.id}', ${index})">➡️</span>
-                  <span class="edit-icon ml-2 editable" onclick="openEditLinkModal('${section.id}', ${index})">✏️</span>
-                  <span class="delete-icon editable" onclick="deleteLink('${section.id}', '${link.title}')">🗑️</span>
-                </div>
-              </li>`).join('')}
-          </ul>
-        </div>`;
-      $('#bookmarkContainer').append(sectionHtml);
-    });
-
+        </div>
+        <ul class="list-group" id="links-${section.id}">
+          ${section.links.map((link, index) => `
+            <li class="list-group-item d-flex justify-content-between align-items-center" data-index="${index}" data-parent-id="${link.parentId || ''}">
+              <a href="${link.url}" style="padding-left: ${link.parentId ? '30px' : '0px'};">${link.title}</a>
+              <div>
+                <span class="arrow-icon editable" onclick="moveLeft('${section.id}', ${index})">⬅️</span>
+                <span class="arrow-icon editable" onclick="moveRight('${section.id}', ${index})">➡️</span>
+                <span class="edit-icon ml-2 editable" onclick="openEditLinkModal('${section.id}', ${index})">✏️</span>
+                <span class="delete-icon editable" onclick="deleteLink('${section.id}', '${link.title}')">🗑️</span>
+              </div>
+            </li>`).join('')}
+        </ul>
+      </div>`;
+    $('#bookmarkContainer').append(sectionHtml);
+  });
+  
     // Rendre les sections réordonnables et sauvegarder leur ordre
     $('#bookmarkContainer').sortable({
         handle: ".bookmark-title",
         update: function(event, ui) {
-            const sortedIDs = $('#bookmarkContainer').sortable('toArray');
-            bookmarksData.sections.sort((a, b) => sortedIDs.indexOf(a.id) - sortedIDs.indexOf(b.id));
-            saveSectionOrder();
+          const sortedIDs = $('#bookmarkContainer').sortable('toArray');
+          bookmarksData.sections.sort((a, b) => sortedIDs.indexOf(a.id) - sortedIDs.indexOf(b.id));
+          
+          // Sauvegarder l'ordre des sections triées
+          saveSectionOrder();
         }
-    });
+      });
 
     // Rendre les liens dans chaque section réordonnables
     $(".sortable-links").sortable({
@@ -200,11 +202,12 @@ function renderBookmarks() {
 
 function saveSectionOrder() {
     bookmarksData.sections.forEach((section, index) => {
+      // Mise à jour de la position sans créer de nouvelle section
       section.position = index;
       saveSection(section);
     });
   }
-  
+
 function deleteSection(sectionId) {
     const transaction = db.transaction("sectionsStore", "readwrite");
     const objectStore = transaction.objectStore("sectionsStore");

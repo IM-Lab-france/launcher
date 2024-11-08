@@ -45,17 +45,21 @@ function loadBookmarks() {
 
     const request = objectStore.getAll();
     request.onsuccess = function(event) {
-        bookmarksData.sections = event.target.result;
+        const allData = event.target.result;
 
+        // Filtrer pour n'inclure que les sections, en excluant l'enregistrement de langue
+        bookmarksData.sections = allData.filter(item => item.id !== "app_language");
+
+        // Trier les sections par position
         bookmarksData.sections.sort((a, b) => (a.position || 0) - (b.position || 0));
-        
-        // Assurez-vous que chaque section possède un tableau de liens
-        bookmarksData.sections.forEach(section => {
-            section.links = section.links || [];
-        });
 
-        bookmarksData.sections.sort((a, b) => a.position - b.position);
         renderBookmarks();
+
+        // Charger la langue
+        const languageData = allData.find(item => item.id === "app_language");
+        const language = languageData ? languageData.value : "fr"; // Français par défaut
+        document.getElementById('languageSelect').value = language;
+        loadLanguage(language); // Appliquer la langue à l'interface
     };
 }
 
@@ -63,12 +67,13 @@ function saveData() {
     const transaction = db.transaction("sectionsStore", "readwrite");
     const objectStore = transaction.objectStore("sectionsStore");
 
+    // Sauvegarder uniquement les sections, sans inclure l'enregistrement de langue
     bookmarksData.sections.forEach(section => {
         objectStore.put(section);
     });
 
     transaction.oncomplete = function() {
-        console.log("Toutes les sections ont été sauvegardées");
+        console.log("Toutes les sections ont été sauvegardées sans la langue.");
     };
 
     transaction.onerror = function(event) {
