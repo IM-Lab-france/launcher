@@ -155,7 +155,13 @@ function renderBookmarks() {
         <ul class="list-group  sortable-links" id="links-${section.id}">
           ${section.links.map((link, index) => `
             <li class="list-group-item d-flex justify-content-between align-items-center" data-index="${index}" data-parent-id="${link.parentId || ''}">
-              <a href="${link.url}" style="padding-left: ${link.parentId ? '30px' : '0px'};">${link.title}</a>
+
+            <div class="d-flex align-items-center" style="padding-left: ${link.parentId ? '30px' : '0px'};">
+            <img src="https://www.google.com/s2/favicons?sz=32&domain=${new URL(link.url).hostname}" 
+                 alt="favicon" style="width: 16px; height: 16px; margin-right: 5px;" 
+                 onerror="this.style.display='none'">
+            <a href="${link.url}" style="text-decoration: none;">${link.title}</a>
+          </div>
               <div>
                 <span class="arrow-icon editable" onclick="moveLeft('${section.id}', ${index})">⬅️</span>
                 <span class="arrow-icon editable" onclick="moveRight('${section.id}', ${index})">➡️</span>
