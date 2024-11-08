@@ -152,7 +152,7 @@ function renderBookmarks() {
           <span class="add-link-icon ml-2 editable" onclick="openAddLinkModal('${section.id}')">➕</span>
           <span class="delete-icon ml-2 editable" onclick="deleteSection('${section.id}')">🗑️</span>
         </div>
-        <ul class="list-group" id="links-${section.id}">
+        <ul class="list-group  sortable-links" id="links-${section.id}">
           ${section.links.map((link, index) => `
             <li class="list-group-item d-flex justify-content-between align-items-center" data-index="${index}" data-parent-id="${link.parentId || ''}">
               <a href="${link.url}" style="padding-left: ${link.parentId ? '30px' : '0px'};">${link.title}</a>
@@ -167,7 +167,7 @@ function renderBookmarks() {
       </div>`;
     $('#bookmarkContainer').append(sectionHtml);
   });
-  
+
     // Rendre les sections réordonnables et sauvegarder leur ordre
     $('#bookmarkContainer').sortable({
         handle: ".bookmark-title",
@@ -181,23 +181,40 @@ function renderBookmarks() {
       });
 
     // Rendre les liens dans chaque section réordonnables
-    $(".sortable-links").sortable({
-        connectWith: ".sortable-links",  // Permet de déplacer entre les sections
+    // Rendre les liens dans chaque section réordonnables
+    $('.sortable-links').sortable({
+        connectWith: '.sortable-links', // Permet le déplacement entre listes
         update: function(event, ui) {
-            const sectionId = $(this).attr("id").replace("links-", "");
-            const section = bookmarksData.sections.find(s => s.id === sectionId);
-            
-            // Réorganiser les liens en tenant compte de l'ordre actuel dans le DOM
-            section.links = $(this).children().map((_, el) => {
-                const linkIndex = $(el).data("index");
-                return section.links[linkIndex];
-            }).get();
-            
-            saveSection(section);
+            const sectionId = $(this).attr('id').replace('links-', '');
+            updateLinkOrder(sectionId);
         }
     });
 
     toggleEditModeDisplay(); // Assure que les éléments éditables sont visibles selon le mode
+}
+
+// Mettre à jour l'ordre des sections dans la base de données
+function updateSectionOrder() {
+    $('#bookmarkContainer .bookmark-section').each(function(index) {
+        const sectionId = $(this).attr('id');
+        const section = bookmarksData.sections.find(s => s.id === sectionId);
+        section.position = index; // Mettre à jour la position
+
+        saveSection(section); // Sauvegarde en base de données
+    });
+}
+
+// Mettre à jour l'ordre des liens dans une section
+function updateLinkOrder(sectionId) {
+    const section = bookmarksData.sections.find(s => s.id === sectionId);
+
+    const sortedLinks = $(`#links-${sectionId} .list-group-item`).map(function() {
+        const index = $(this).data('index');
+        return section.links[index];
+    }).get();
+
+    section.links = sortedLinks; // Met à jour l'ordre des liens
+    saveSection(section);
 }
 
 function saveSectionOrder() {
