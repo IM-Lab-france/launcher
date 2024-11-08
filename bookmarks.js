@@ -113,39 +113,98 @@ function downloadBookmarks() {
     };
 }
 
+
+
+
+// Rendre les liens dans chaque section réordonnables
+bookmarksData.sections.forEach((section) => {
+    $(`#links-${section.id}`).sortable({
+        update: function(event, ui) {
+            const sortedLinks = $(`#links-${section.id} .list-group-item`).map((_, el) => ({
+                index: $(el).data("index"),
+                parentId: $(el).data("parent-id")
+            })).get();
+
+            // Réorganiser les liens en tenant compte des sous-URL
+            section.links = sortedLinks.map(item => {
+                const link = section.links[item.index];
+                link.parentId = item.parentId || null;
+                return link;
+            });
+            
+            saveSection(section);
+        }
+    });
+});
+
 function renderBookmarks() {
     $('#bookmarkContainer').empty();
     console.log("Rendu des bookmarks avec sections:", bookmarksData.sections);
-
+    
+    // Trier les sections par position
     bookmarksData.sections.sort((a, b) => (a.position || 0) - (b.position || 0));
+
     bookmarksData.sections.forEach((section) => {
-        const sectionHtml = `
-            <div class="col-lg-4 col-md-6 col-sm-12 mb-4 bookmark-section" id="${section.id}">
-                <div class="bookmark-title">${section.title}
-                    <span class="edit-icon ml-2 editable" onclick="openEditSectionModal('${section.id}')">✏️</span>
-                    <span class="add-link-icon ml-2 editable" onclick="openAddLinkModal('${section.id}')">➕</span>
-                    <span class="delete-icon ml-2 editable" onclick="deleteSection('${section.id}')">🗑️</span>
+      const sectionHtml = `
+        <div class="col-lg-4 col-md-6 col-sm-12 mb-4 bookmark-section" id="${section.id}">
+          <div class="bookmark-title">${section.title}
+          <span class="edit-icon ml-2 editable" onclick="openEditSectionModal('${section.id}')">✏️</span>
+          <span class="add-link-icon ml-2 editable" onclick="openAddLinkModal('${section.id}')">➕</span>
+          <span class="delete-icon ml-2 editable" onclick="deleteSection('${section.id}')">🗑️</span>
+          </div>
+          <ul class="list-group sortable-links" id="links-${section.id}">
+            ${section.links.map((link, index) => `
+              <li class="list-group-item d-flex justify-content-between align-items-center" data-index="${index}" data-id="${link.id}">
+                <a href="${link.url}" style="padding-left: ${link.parentId ? '30px' : '0px'};">${link.title}</a>
+                <div>
+                  <span class="arrow-icon editable" onclick="moveLeft('${section.id}', ${index})">⬅️</span>
+                  <span class="arrow-icon editable" onclick="moveRight('${section.id}', ${index})">➡️</span>
+                  <span class="edit-icon ml-2 editable" onclick="openEditLinkModal('${section.id}', ${index})">✏️</span>
+                  <span class="delete-icon editable" onclick="deleteLink('${section.id}', '${link.title}')">🗑️</span>
                 </div>
-                <ul class="list-group" id="links-${section.id}">
-                    ${section.links.map((link, index) => `
-                        <li class="list-group-item d-flex justify-content-between align-items-center" data-index="${index}" data-parent-id="${link.parentId || ''}">
-                            <a href="${link.url}" style="padding-left: ${link.parentId ? '30px' : '0px'};">${link.title}</a>
-                            <div>
-                                <span class="arrow-icon editable" onclick="moveLeft('${section.id}', ${index})">⬅️</span>
-                                <span class="arrow-icon editable" onclick="moveRight('${section.id}', ${index})">➡️</span>
-                                <span class="edit-icon ml-2 editable" onclick="openEditLinkModal('${section.id}', ${index})">✏️</span>
-                                <span class="delete-icon editable" onclick="deleteLink('${section.id}', '${link.title}')">🗑️</span>
-                            </div>
-                        </li>`).join('')}
-                </ul>
-            </div>`;
-        $('#bookmarkContainer').append(sectionHtml);
+              </li>`).join('')}
+          </ul>
+        </div>`;
+      $('#bookmarkContainer').append(sectionHtml);
     });
 
-    // Appeler `toggleEditModeDisplay()` pour que les éléments éditables soient affichés ou masqués
-    toggleEditModeDisplay();
+    // Rendre les sections réordonnables et sauvegarder leur ordre
+    $('#bookmarkContainer').sortable({
+        handle: ".bookmark-title",
+        update: function(event, ui) {
+            const sortedIDs = $('#bookmarkContainer').sortable('toArray');
+            bookmarksData.sections.sort((a, b) => sortedIDs.indexOf(a.id) - sortedIDs.indexOf(b.id));
+            saveSectionOrder();
+        }
+    });
+
+    // Rendre les liens dans chaque section réordonnables
+    $(".sortable-links").sortable({
+        connectWith: ".sortable-links",  // Permet de déplacer entre les sections
+        update: function(event, ui) {
+            const sectionId = $(this).attr("id").replace("links-", "");
+            const section = bookmarksData.sections.find(s => s.id === sectionId);
+            
+            // Réorganiser les liens en tenant compte de l'ordre actuel dans le DOM
+            section.links = $(this).children().map((_, el) => {
+                const linkIndex = $(el).data("index");
+                return section.links[linkIndex];
+            }).get();
+            
+            saveSection(section);
+        }
+    });
+
+    toggleEditModeDisplay(); // Assure que les éléments éditables sont visibles selon le mode
 }
 
+function saveSectionOrder() {
+    bookmarksData.sections.forEach((section, index) => {
+      section.position = index;
+      saveSection(section);
+    });
+  }
+  
 function deleteSection(sectionId) {
     const transaction = db.transaction("sectionsStore", "readwrite");
     const objectStore = transaction.objectStore("sectionsStore");

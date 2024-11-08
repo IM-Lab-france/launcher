@@ -15,14 +15,23 @@
     .editable {
       display: none;
     }
+
+    .list-group-item {
+    position: relative;
+    display: block;
+    padding: .35rem 1.25rem;
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, .125);
+}
+
     .bookmark-section {
       border: 1px solid #ddd;
       padding: 8px;
-      margin: 5px 5px 10px; /* Ajustement des marges pour plus d'espace */
+      margin: 5px 5px 10px;
       background-color: #f9f9f9;
       border-radius: 5px;
       position: relative;
-      font-size: 0.85em;
+      font-size: 0.8em;
       box-sizing: border-box;
     }
 
@@ -77,65 +86,58 @@
 
     /* Positionnement du champ de numéro Jira en haut à droite */
     .jira-input-container {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      display: flex;
-      align-items: center;
-      font-size: 0.9em;
-    }
+    justify-content: center; /* Centrer le contenu horizontalement */
+    font-size: 0.9em;
+}
 
-    #jiraNumber {
-      margin-left: 10px;
-      width: 150px;
-      font-size: 0.85em;
-    }
+.info-icon {
+    margin-left: 8px;
+    cursor: pointer;
+    color: #007bff;
+    font-size: 1em;
+    position: relative;
+}
 
-    /* Style pour l'icône d'information et le texte explicatif */
-    .info-icon {
-      margin-left: 8px;
-      cursor: pointer;
-      color: #007bff;
-      font-size: 1em;
-      position: relative;
-    }
-
-    .info-text {
-      display: none;
-      position: absolute;
-      top: 20px;
-      right: -10px;
-      background-color: #f1f1f1;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      padding: 5px;
-      width: 200px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-      font-size: 0.75em;
-    }
+.info-text {
+    display: none;
+    position: absolute;
+    top: -60px;
+    right: 0;
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 5px;
+    width: 200px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    font-size: 0.75em;
+}
   </style>
 </head>
 <body>
-  <div style="position: absolute; bottom: 10px; right: 10px;">
-    <span id="editModeToggle" class="edit-icon" style="cursor: pointer;">Edition ✏️</span>
-    <select class="editable" id="languageSelect">
+ <!-- Header avec le lien d'édition en haut à droite -->
+ <header style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; align-items: center;">
+  <h3>Bookmarks Manager</h3>
+  <div style="display: flex; align-items: center;">
+    <!-- Boutons principaux -->
+    <button class="btn btn-primary mr-2 editable" id="new" onclick="openAddSectionModal()">+ Nouvelle Section</button>
+    <button class="btn btn-info mr-2 editable" id="load" onclick="openUploadModal()">Charger Bookmarks</button>
+    <button class="btn btn-success mr-2 editable" id="download" onclick="downloadBookmarks()">Télécharger Bookmarks</button>
+    <button class="btn btn-danger mr-2 editable" id="delete" onclick="openDeleteAllModal()">Effacer les Bookmarks</button>
+    <!-- Sélection de la langue -->
+    <select id="languageSelect" class="editable" style="height: 25px; margin-right: 10px;">
       <option value="fr">Français</option>
       <option value="en">English</option>
-  </select>
+    </select>
+    <!-- Mode édition -->
+    <span id="editModeToggle" class="edit-icon" style="cursor: pointer;">Edition ✏️</span>
   </div>
-<div class="jira-input-container">
-  <input type="text" id="jiraNumber" placeholder="Ex : SAMT-2947" autofocus>
-  <button class="btn btn-primary ml-2" onclick="redirectToJira()">Afficher</button>
-  <span class="info-icon" onmouseover="showInfoText()" onmouseout="hideInfoText()">?</span>
-  <div class="info-text" id="infoText">Entrez un numéro Jira au format XXXX-1234 pour ouvrir la page correspondante.<br>Sinon, vous serez redirigé vers une recherche avec votre entrée.</div>
-</div>
+</header>
 
-<div class="container">
-  <button class="btn btn-primary mb-3 editable" id="new" onclick="openAddSectionModal()">+ Nouvelle Section</button>
-  <button class="btn btn-info mb-3 editable" id="load" onclick="openUploadModal()">Charger Bookmarks</button>
-  <button class="btn btn-success mb-3 editable" id="download" onclick="downloadBookmarks()">Télécharger Bookmarks</button>
-  <button class="btn btn-danger mb-3 editable" id="delete" onclick="openDeleteAllModal()">Effacer les Bookmarks</button>
-  <!-- Container en trois colonnes pour les sections -->
+<!-- Contenu principal -->
+<div class="container mt-3">
+  
+
+  <!-- Container pour les sections -->
   <div id="bookmarkContainer" class="row section-container">
     <!-- Sections chargées dynamiquement ici -->
   </div>
@@ -286,6 +288,14 @@
     </div>
   </div>
 </div>
+<footer style="position: fixed; bottom: 0; width: 100%; background-color: #f9f9f9; padding: 10px 0; border-top: 1px solid #ddd;">
+  <div class="jira-input-container" style="display: flex; justify-content: center;">
+    <input type="text" id="jiraNumber" placeholder="Ex : SAMT-2947" autofocus>
+    <button class="btn btn-primary ml-2" onclick="redirectToJira()">Afficher</button>
+    <span class="info-icon" onmouseover="showInfoText()" onmouseout="hideInfoText()">?</span>
+    <div class="info-text" id="infoText">Entrez un numéro Jira au format XXXX-1234 pour ouvrir la page correspondante.<br>Sinon, vous serez redirigé vers une recherche avec votre entrée.</div>
+  </div>
+</footer>
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
