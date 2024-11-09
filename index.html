@@ -111,6 +111,25 @@
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     font-size: 0.75em;
 }
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #333;
+  color: #fff;
+  border-radius: 5px;
+  opacity: 0;
+  transition: opacity 0.3s, bottom 0.3s;
+  z-index: 1000;
+}
+
+.toast.visible {
+  opacity: 1;
+  bottom: 40px;
+}
+
   </style>
 </head>
 <body>
@@ -290,10 +309,10 @@
 </div>
 <footer style="position: fixed; bottom: 0; width: 100%; background-color: #f9f9f9; padding: 10px 0; border-top: 1px solid #ddd;">
   <div class="jira-input-container" style="display: flex; justify-content: center;">
-    <input type="text" id="jiraNumber" placeholder="Ex : SAMT-2947" autofocus>
-    <button class="btn btn-primary ml-2" onclick="redirectToJira()">Afficher</button>
+    <input type="text" id="URL" placeholder="www.google.fr" autofocus>
+    <button class="btn btn-primary ml-2" onclick="redirectToWeb()">Afficher</button>
     <span class="info-icon" onmouseover="showInfoText()" onmouseout="hideInfoText()">?</span>
-    <div class="info-text" id="infoText">Entrez un numéro Jira au format XXXX-1234 pour ouvrir la page correspondante.<br>Sinon, vous serez redirigé vers une recherche avec votre entrée.</div>
+    <div class="info-text" id="infoText">Entrez un URL qui sera ouverte en mode simplifier</div>
   </div>
 </footer>
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>

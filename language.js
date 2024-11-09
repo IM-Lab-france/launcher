@@ -4,7 +4,7 @@ const translations = {
         "load": "Charger un Bookmark",
         "download": "Sauvegarder un Bookmark",
         "delete": "Tout effacer",
-        "infoText": "Entrez un numéro Jira au format XXXX-1234 pour ouvrir la page correspondante. Sinon, vous serez redirigé vers une recherche avec votre entrée.",
+        "infoText": "Entrez une URL pour l'afficher dans cette fenêtre",
         "title" : "Gestion des signets"
     },
     "en": {
@@ -12,7 +12,7 @@ const translations = {
         "load": "Load Bookmark",
         "download": "Download Bookmark",
         "delete": "Delete all",
-        "infoText": "Enter a Jira number in the format XXXX-1234 to open the corresponding page. Otherwise, you will be redirected to a search with your input.",
+        "infoText": "Enter URL to display it in this window.",
         "title" : "Bookmarks Manager"
     }
 };

@@ -9,6 +9,30 @@ document.getElementById("editModeToggle").addEventListener("click", function() {
     toggleEditModeDisplay();
 });
 
+function redirectToWeb() {
+  const urlInput = document.getElementById("URL").value.trim();
+  const url = urlInput.startsWith("http://") || urlInput.startsWith("https://") ? urlInput : `https://${urlInput}`;
+
+  window.location.href = url;
+
+}
+
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.innerText = message;
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+      toast.classList.add("visible");
+  }, 100);
+
+  setTimeout(() => {
+      toast.classList.remove("visible");
+      setTimeout(() => document.body.removeChild(toast), 300);
+  }, 3000);
+}
+
 function isValidURL(url) {
     const pattern = new RegExp(
         "^(https?:\\/\\/)?" +                      // Protocole facultatif
