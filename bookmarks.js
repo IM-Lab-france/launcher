@@ -45,7 +45,7 @@ $(document).ready(function () {
       $(this).css("display", isEditMode ? "inline-block" : "none");
     });
     $("#editModeToggle").html(
-      isEditMode ? "Quitter le mode édition 🚪" : "Edition ✏️"
+      isEditMode ? "🚪 Quitter mode édition" : "✏️ Mode édition"
     );
   }
 

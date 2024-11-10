@@ -76,9 +76,14 @@ body {
   min-height: 200px;
 }
 
+#languageSelect {
+  font-size: 11px;
+}
+
 .btn {
   height: 25px;
   padding: 1px .75rem;
+  font-size: 11px;
 }
 
 /* Configuration pour l'affichage en trois colonnes */
@@ -105,6 +110,16 @@ body {
     /* Deux colonnes sur écrans moyens */
     max-width: 48%;
   }
+
+  .btn-text {
+    display: none;
+    /* Masquer le texte des boutons */
+  }
+
+  .btn-icon {
+    display: inline;
+    /* Afficher les icônes */
+  }
 }
 
 @media (max-width: 768px) {
@@ -113,6 +128,8 @@ body {
     /* Une seule colonne sur écrans petits */
     max-width: 100%;
   }
+
+
 }
 
 /* Positionnement du champ de numéro Jira en haut à droite */
@@ -169,4 +186,66 @@ body {
 
 .toast.error {
   background-color: #dc3545;
+}
+
+#languageSelect option {
+  background-repeat: no-repeat;
+  background-position: left center;
+  padding-left: 30px;
+}
+
+.language-flag {
+  width: 24px;
+  height: auto;
+  cursor: pointer;
+}
+
+.language-flag.selected {
+  border: 2px solid #007bff;
+  border-radius: 3px;
+}
+
+.custom-select {
+  position: relative;
+  width: 100px;
+  cursor: pointer;
+}
+
+.selected-option {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  background-color: #fff;
+}
+
+.selected-option .flag {
+  width: 20px;
+  margin-right: 5px;
+}
+
+.options {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  border-radius: 5px;
+  z-index: 10;
+}
+
+.options .option {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+}
+
+.options .option:hover {
+  background-color: #f1f1f1;
+}
+
+.options .flag {
+  width: 20px;
+  margin-right: 5px;
 }

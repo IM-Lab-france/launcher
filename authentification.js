@@ -6,7 +6,7 @@ $(document).ready(function () {
   function displayWelcomeMessage(username) {
     const $welcomeMessage = $("#userGreeting");
     if ($welcomeMessage.length) {
-      $welcomeMessage.html(`Bonjour, ${username}`);
+      $welcomeMessage.html(`🧑‍💻 ${username}`);
       $welcomeMessage.show();
     }
   }
@@ -30,12 +30,12 @@ $(document).ready(function () {
       username = payload.username;
 
       userGreeting.style.display = "inline";
-      userGreeting.textContent = `Bonjour ${username}`;
-      authLink.textContent = "Déconnexion";
+      userGreeting.textContent = `🧑‍💻 ${username}`;
+      authLink.innerHTML = "🔓 Déconnexion";
       authLink.onclick = logout;
     } else {
       userGreeting.style.display = "none";
-      authLink.textContent = "Connexion";
+      authLink.innerHTML = "🔒 Connexion";
       authLink.onclick = toggleAuthModal;
     }
   }
@@ -93,22 +93,6 @@ $(document).ready(function () {
       loadServerBookmarks();
     } else {
       showToast("Identifiants incorrects.", "error");
-    }
-  }
-
-  // Fonction pour gérer l'affichage du nom d'utilisateur dans le menu
-  function displayUsername() {
-    const $authContainer = $("#authContainer");
-    if ($authContainer.length) {
-      if (token && username) {
-        $authContainer.html(
-          `<span>Bonjour, ${username}</span> | <span id="authLink" style="cursor: pointer;" onclick="toggleAuthModal()">Déconnexion</span>`
-        );
-      } else {
-        $authContainer.html(
-          `<span id="authLink" style="cursor: pointer;" onclick="toggleAuthModal()">Connexion</span>`
-        );
-      }
     }
   }
 

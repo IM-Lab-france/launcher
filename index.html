@@ -14,28 +14,49 @@
   <!-- Menu burger -->
   <div class="burger-menu" onclick="toggleBurgerMenu()">☰</div>
   <div class="burger-menu-content" id="burgerMenuContent">
-    <span id="userGreeting" style="display: none; margin-right: 10px;">Bonjour</span>
-    <a href="javascript:void(0);" id="authLink" onclick="toggleAuthModal()">Connexion</a>
-    <a id="editModeToggle" class="edit-icon" style="cursor: pointer;">Mode Édition</a>
+    <span id="userGreeting" style="display: none; margin-right: 10px;">Hello</span>
+    <a href="javascript:void(0);" id="authLink" onclick="toggleAuthModal()">🔒 Connexion</a>
+    <a id="editModeToggle" class="edit-icon" style="cursor: pointer;">✏️ Mode Édition</a>
+    <!-- Sélection de la langue -->
+    <div class="custom-select" id="languageSelect">
+      <div class="selected-option">
+        <img src="img/french-flag.png" alt="Français" data-lang="fr" class="flag" id="selectedFlag">
+      </div>
+      <div class="options">
+        <div class="option" data-lang="fr">
+          <img src="img/french-flag.png" alt="Français" class="flag"> Français
+        </div>
+        <div class="option" data-lang="en">
+          <img src="img/english-flag.png" alt="English" class="flag"> English
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Header principal -->
   <header
     style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; align-items: center;">
-    <h3 id="title">Bookmarks Manager</h3>
-    <div style="display: flex; align-items: center;">
+    <h1 id="title" style="font-size: clamp(1.5rem, 3vw, 2.5rem);">Bookmarks Manager</h1>
+    <div style="display: flex; align-items: center; position: relative; right: 26px;">
       <!-- Boutons principaux -->
-      <button class="btn btn-primary mr-2 editable" id="new" onclick="openAddSectionModal()">+ Nouvelle Section</button>
-      <button class="btn btn-info mr-2 editable" id="load" onclick="openUploadModal()">Charger Bookmarks</button>
-      <button class="btn btn-success mr-2 editable" id="download" onclick="downloadBookmarks()">Télécharger
-        Bookmarks</button>
-      <button class="btn btn-danger mr-2 editable" id="delete" onclick="openDeleteAllModal()">Effacer les
-        Bookmarks</button>
-      <!-- Sélection de la langue -->
-      <select id="languageSelect" class="editable" style="height: 25px; margin-right: 10px;">
-        <option value="fr">Français</option>
-        <option value="en">English</option>
-      </select>
+      <button class="btn btn-primary mr-2 editable" id="new" onclick="openAddSectionModal()">
+        <span class="btn-icon">➕</span>
+        <span class="btn-text">Nouvelle Section</span>
+      </button>
+      <button class="btn btn-info mr-2 editable" id="load" onclick="openUploadModal()">
+        <span class="btn-icon">📂</span>
+        <span class="btn-text">Charger Bookmarks</span>
+      </button>
+      <button class="btn btn-success mr-2 editable" id="download" onclick="downloadBookmarks()">
+        <span class="btn-icon">⬇️</span>
+        <span class="btn-text">Télécharger Bookmarks</span>
+      </button>
+      <button class="btn btn-danger mr-2 editable" id="delete" onclick="openDeleteAllModal()">
+        <span class="btn-icon">🗑️</span>
+        <span class="btn-text">Effacer les Bookmarks</span>
+      </button>
+
+
 
     </div>
   </header>

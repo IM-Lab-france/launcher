@@ -7,6 +7,10 @@ $(document).ready(function () {
       delete: "Tout effacer",
       infoText: "Entrez une URL pour l'afficher dans cette fenêtre",
       title: "Gestion des signets",
+      editModeOn: "Mode Édition",
+      editModeOff: "Quitter Édition",
+      login: "Connexion",
+      logout: "Déconnexion",
     },
     en: {
       new: "New Section",
@@ -15,32 +19,60 @@ $(document).ready(function () {
       delete: "Delete all",
       infoText: "Enter URL to display it in this window.",
       title: "Bookmarks Manager",
+      editModeOn: "Edit Mode",
+      editModeOff: "Exit Edit Mode",
+      login: "Login",
+      logout: "Logout",
     },
   };
 
+  const jwtToken = localStorage.getItem("jwtToken");
+
+  // Récupérer la langue de l'utilisateur au chargement de la page
+  function loadUserLanguage() {
+    $.ajax({
+      url: "getLanguage.php",
+      type: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({ token: jwtToken }),
+      success: function (response) {
+        if (response.success) {
+          const language = response.language || "fr";
+          loadLanguage(language);
+          $("#selectedFlag").attr(
+            "src",
+            `img/${language === "fr" ? "french" : "english"}-flag.png`
+          );
+        } else {
+          console.warn(response.message);
+          loadLanguage("fr"); // Langue par défaut si aucune préférence n'est trouvée
+        }
+      },
+      error: function () {
+        console.error("Erreur lors de la récupération de la langue.");
+        loadLanguage("fr"); // Langue par défaut en cas d'erreur
+      },
+    });
+  }
+
+  // Sauvegarder la langue de l'utilisateur dans la base de données
   function saveLanguage(language) {
-    if (!db) {
-      console.error(
-        "Base de données non disponible pour sauvegarder la langue."
-      );
-      return;
-    }
-
-    const transaction = db.transaction("sectionsStore", "readwrite");
-    const objectStore = transaction.objectStore("sectionsStore");
-
-    objectStore.put({ id: "app_language", value: language });
-
-    transaction.oncomplete = function () {
-      console.log("Langue sauvegardée:", language);
-    };
-
-    transaction.onerror = function (event) {
-      console.error(
-        "Erreur lors de la sauvegarde de la langue:",
-        event.target.errorCode
-      );
-    };
+    $.ajax({
+      url: "saveLanguage.php",
+      type: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({ token: jwtToken, language }),
+      success: function (response) {
+        if (response.success) {
+          console.log("Langue sauvegardée:", language);
+        } else {
+          console.warn(response.message);
+        }
+      },
+      error: function () {
+        console.error("Erreur lors de la sauvegarde de la langue.");
+      },
+    });
   }
 
   function loadDefaultLanguageAndBookmarks() {
@@ -56,15 +88,12 @@ $(document).ready(function () {
 
     const requestLang = objectStore.get("app_language");
     requestLang.onsuccess = function () {
-      const $languageSelect = $("#languageSelect");
-      if (!$languageSelect.length) {
-        console.error("Élément 'languageSelect' introuvable dans le DOM.");
-        return;
-      }
-
       const language = requestLang.result ? requestLang.result.value : "fr";
-      $languageSelect.val(language);
       loadLanguage(language);
+      $("#selectedFlag").attr(
+        "src",
+        `img/${language === "fr" ? "french" : "english"}-flag.png`
+      );
     };
 
     const requestSections = objectStore.getAll();
@@ -72,11 +101,9 @@ $(document).ready(function () {
       bookmarksData.sections = event.target.result.filter(
         (section) => section.id !== "app_language"
       );
-
-      bookmarksData.sections.forEach((section) => {
-        section.links = section.links || [];
-      });
-
+      bookmarksData.sections.forEach(
+        (section) => (section.links = section.links || [])
+      );
       renderBookmarks();
     };
 
@@ -98,31 +125,62 @@ $(document).ready(function () {
       title: "title",
     };
 
-    $.each(elementsToTranslate, function (key, elementId) {
-      const $element = $(`#${elementId}`);
+    const isEditMode = $("#editModeToggle").hasClass("active"); // Suppose un état actif pour l'édition
+    const isLoggedIn = $("#authLink").data("loggedIn"); // Suppose un attribut pour l'état de connexion
+
+    elementsToTranslate.editModeToggle = isEditMode
+      ? "editModeOff"
+      : "editModeOn";
+    elementsToTranslate.authLink = isLoggedIn ? "logout" : "login";
+
+    $.each(elementsToTranslate, function (key, translationKey) {
+      const $element = $(`#${key}`);
       if ($element.length) {
-        $element.text(translations[language][key]);
+        let icon = "";
+
+        if (translationKey === "login" || translationKey === "logout") {
+          icon = isLoggedIn ? "🔓" : "🔒";
+        } else if (
+          translationKey === "editModeOn" ||
+          translationKey === "editModeOff"
+        ) {
+          icon = isEditMode ? "✅" : "✏️";
+        }
+
+        $element.html(`${icon} ${translations[language][translationKey]}`);
       } else {
-        console.warn(`Élément avec l'ID '${elementId}' introuvable.`);
+        console.warn(`Élément avec l'ID '${key}' introuvable.`);
       }
     });
   }
 
-  const checkLanguageSelect = setInterval(() => {
-    const $languageSelect = $("#languageSelect");
-    if ($languageSelect.length) {
-      clearInterval(checkLanguageSelect);
-      $languageSelect.on("change", function () {
-        const selectedLanguage = $(this).val();
-        loadLanguage(selectedLanguage);
-        saveLanguage(selectedLanguage);
-      });
+  // Gestion du changement de langue via le sélecteur personnalisé
+  $("#languageSelect").on("click", function () {
+    $(this).find(".options").toggle();
+  });
 
-      if (db) {
-        loadDefaultLanguageAndBookmarks();
-      }
-    }
-  }, 100);
+  $("#languageSelect .option").on("click", function () {
+    const selectedLanguage = $(this).data("lang");
+    $("#selectedFlag").attr(
+      "src",
+      `img/${selectedLanguage === "fr" ? "french" : "english"}-flag.png`
+    );
+    loadLanguage(selectedLanguage);
+    saveLanguage(selectedLanguage);
+    $(this).closest(".options").hide(); // Ferme le menu après avoir sélectionné une langue
+  });
+
+  $("#languageSelect").on("focusout", function () {
+    $(this).find(".options").hide();
+  });
+
+  // Charger les signets et la langue de l'utilisateur si disponibles
+  if (db) {
+    loadDefaultLanguageAndBookmarks();
+  }
+
+  // Charger la langue de l'utilisateur lors de l'initialisation
+  loadUserLanguage();
 
   window.loadLanguage = loadLanguage;
 });
