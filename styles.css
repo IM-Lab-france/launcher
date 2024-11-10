@@ -4,6 +4,32 @@ body {
   font-family: Arial, sans-serif;
 }
 
+#wallpaperContainer img {
+  width: 80px;
+  height: 80px;
+  margin: 5px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border 0.3s ease;
+  border: 2px solid transparent;
+}
+
+#wallpaperContainer img.selected {
+  border: 2px solid #007bff;
+  border-radius: 10px;
+}
+
+#backgroundOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+}
+
 .editable {
   display: none;
 }

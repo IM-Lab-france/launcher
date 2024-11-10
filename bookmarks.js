@@ -118,6 +118,22 @@ $(document).ready(function () {
     };
   }
 
+  function saveSectionOrder() {
+    // Mettre à jour la position de chaque section dans bookmarksData
+    $("#bookmarkContainer .bookmark-section").each(function (index) {
+      const sectionId = $(this).attr("id");
+      const section = window.bookmarksData.sections.find(
+        (s) => s.id === sectionId
+      );
+      if (section) {
+        section.position = index;
+      }
+    });
+
+    // Sauvegarder l'ordre des sections sur le serveur
+    saveBookmarksToServer();
+  }
+
   function renderBookmarks() {
     $("#bookmarkContainer").empty();
 
