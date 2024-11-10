@@ -24,6 +24,18 @@ $(document).ready(function () {
       login: "Login",
       logout: "Logout",
     },
+    es: {
+      new: "Nueva sección",
+      load: "Cargar Marcador",
+      download: "Guardar Marcador",
+      delete: "Borrar todo",
+      infoText: "Introduce una URL para mostrarla en esta ventana",
+      title: "Gestor de Marcadores",
+      editModeOn: "Modo Edición",
+      editModeOff: "Salir del Modo Edición",
+      login: "Iniciar sesión",
+      logout: "Cerrar sesión",
+    },
   };
 
   const jwtToken = localStorage.getItem("jwtToken");
@@ -41,7 +53,13 @@ $(document).ready(function () {
           loadLanguage(language);
           $("#selectedFlag").attr(
             "src",
-            `img/${language === "fr" ? "french" : "english"}-flag.png`
+            `img/${
+              language === "fr"
+                ? "french"
+                : language === "en"
+                ? "english"
+                : "spain"
+            }-flag.png`
           );
         } else {
           console.warn(response.message);
@@ -92,7 +110,13 @@ $(document).ready(function () {
       loadLanguage(language);
       $("#selectedFlag").attr(
         "src",
-        `img/${language === "fr" ? "french" : "english"}-flag.png`
+        `img/${
+          selectedLanguage === "fr"
+            ? "french"
+            : selectedLanguage === "en"
+            ? "english"
+            : "spain"
+        }-flag.png`
       );
     };
 
@@ -163,7 +187,13 @@ $(document).ready(function () {
     const selectedLanguage = $(this).data("lang");
     $("#selectedFlag").attr(
       "src",
-      `img/${selectedLanguage === "fr" ? "french" : "english"}-flag.png`
+      `img/${
+        selectedLanguage === "fr"
+          ? "french"
+          : selectedLanguage === "en"
+          ? "english"
+          : "spain"
+      }-flag.png`
     );
     loadLanguage(selectedLanguage);
     saveLanguage(selectedLanguage);
