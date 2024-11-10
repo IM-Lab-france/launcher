@@ -1,0 +1,172 @@
+/* Police plus petite pour l'ensemble de la page */
+body {
+  font-size: 0.85em;
+  font-family: Arial, sans-serif;
+}
+
+.editable {
+  display: none;
+}
+
+.burger-menu {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  cursor: pointer;
+  font-size: 1.5em;
+  z-index: 1000;
+}
+
+.burger-menu-content {
+  display: none;
+  position: absolute;
+  top: 50px;
+  right: 15px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  z-index: 1001;
+}
+
+.burger-menu-content a {
+  display: block;
+  padding: 8px 12px;
+  text-decoration: none;
+  color: #333;
+}
+
+.burger-menu-content a:hover {
+  background-color: #f1f1f1;
+}
+
+.list-group-item {
+  position: relative;
+  display: block;
+  padding: .35rem 1.25rem;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, .125);
+}
+
+.bookmark-section {
+  border: 1px solid #ddd;
+  padding: 8px;
+  margin: 5px 5px 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  position: relative;
+  font-size: 0.8em;
+  box-sizing: border-box;
+}
+
+.bookmark-title {
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.delete-icon {
+  cursor: pointer;
+  color: red;
+  float: right;
+  font-size: 0.9em;
+}
+
+.section-container {
+  min-height: 200px;
+}
+
+.btn {
+  height: 25px;
+  padding: 1px .75rem;
+}
+
+/* Configuration pour l'affichage en trois colonnes */
+.col-lg-4 {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 30%;
+  /* Deux colonnes sur écrans moyens */
+  max-width: 30%;
+}
+
+@media (min-width: 1600px) {
+  .col-lg-4 {
+    flex: 0 0 24%;
+    /* Deux colonnes sur écrans moyens */
+    max-width: 24%;
+  }
+}
+
+/* Adaptation pour que chaque section occupe toute la largeur sur les petits écrans */
+@media (max-width: 992px) {
+  .col-lg-4 {
+    flex: 0 0 48%;
+    /* Deux colonnes sur écrans moyens */
+    max-width: 48%;
+  }
+}
+
+@media (max-width: 768px) {
+  .col-lg-4 {
+    flex: 0 0 100%;
+    /* Une seule colonne sur écrans petits */
+    max-width: 100%;
+  }
+}
+
+/* Positionnement du champ de numéro Jira en haut à droite */
+.jira-input-container {
+  justify-content: center;
+  /* Centrer le contenu horizontalement */
+  font-size: 0.9em;
+}
+
+.info-icon {
+  margin-left: 8px;
+  cursor: pointer;
+  color: #007bff;
+  font-size: 1em;
+  position: relative;
+}
+
+.info-text {
+  display: none;
+  position: absolute;
+  top: -60px;
+  right: 0;
+  background-color: #f1f1f1;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 5px;
+  width: 200px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  font-size: 0.75em;
+}
+
+/* Styles pour les toasts */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.3s, bottom 0.3s;
+  z-index: 1000;
+}
+
+.toast.visible {
+  opacity: 1;
+  bottom: 40px;
+}
+
+/* Types de toasts */
+.toast.success {
+  background-color: #28a745;
+}
+
+.toast.error {
+  background-color: #dc3545;
+}

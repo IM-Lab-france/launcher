@@ -1,326 +1,274 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bookmarks Manager</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    /* Police plus petite pour l'ensemble de la page */
-    body {
-      font-size: 0.85em;
-      font-family: Arial, sans-serif;
-    }
-
-    .editable {
-      display: none;
-    }
-
-    .list-group-item {
-    position: relative;
-    display: block;
-    padding: .35rem 1.25rem;
-    background-color: #fff;
-    border: 1px solid rgba(0, 0, 0, .125);
-}
-
-    .bookmark-section {
-      border: 1px solid #ddd;
-      padding: 8px;
-      margin: 5px 5px 10px;
-      background-color: #f9f9f9;
-      border-radius: 5px;
-      position: relative;
-      font-size: 0.8em;
-      box-sizing: border-box;
-    }
-
-    .bookmark-title {
-      font-weight: bold;
-      font-size: 0.9em;
-    }
-
-    .delete-icon {
-      cursor: pointer;
-      color: red;
-      float: right;
-      font-size: 0.9em;
-    }
-
-    .section-container {
-      min-height: 200px;
-    }
-
-    .btn {
-      height: 25px;
-      padding: 1px .75rem;
-    }
-    /* Configuration pour l'affichage en trois colonnes */
-    .col-lg-4 {
-      display: flex;
-      flex-direction: column;
-      flex: 0 0 30%; /* Deux colonnes sur écrans moyens */
-      max-width: 30%;
-    }
-
-    @media (min-width: 1600px) {
-      .col-lg-4 {
-        flex: 0 0 24%; /* Deux colonnes sur écrans moyens */
-        max-width: 24%;
-      }
-    }
-
-    /* Adaptation pour que chaque section occupe toute la largeur sur les petits écrans */
-    @media (max-width: 992px) {
-      .col-lg-4 {
-        flex: 0 0 48%; /* Deux colonnes sur écrans moyens */
-        max-width: 48%;
-      }
-    }
-    @media (max-width: 768px) {
-      .col-lg-4 {
-        flex: 0 0 100%; /* Une seule colonne sur écrans petits */
-        max-width: 100%;
-      }
-    }
-
-    /* Positionnement du champ de numéro Jira en haut à droite */
-    .jira-input-container {
-    justify-content: center; /* Centrer le contenu horizontalement */
-    font-size: 0.9em;
-}
-
-.info-icon {
-    margin-left: 8px;
-    cursor: pointer;
-    color: #007bff;
-    font-size: 1em;
-    position: relative;
-}
-
-.info-text {
-    display: none;
-    position: absolute;
-    top: -60px;
-    right: 0;
-    background-color: #f1f1f1;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 5px;
-    width: 200px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    font-size: 0.75em;
-}
-
-.toast {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 10px 20px;
-  background-color: #333;
-  color: #fff;
-  border-radius: 5px;
-  opacity: 0;
-  transition: opacity 0.3s, bottom 0.3s;
-  z-index: 1000;
-}
-
-.toast.visible {
-  opacity: 1;
-  bottom: 40px;
-}
-
-  </style>
+  <link rel="icon" href="simplifier.png" type="image/png">
+  <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
- <!-- Header avec le lien d'édition en haut à droite -->
- <header style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; align-items: center;">
-  <h3 id="title">Bookmarks Manager</h3>
-  <div style="display: flex; align-items: center;">
-    <!-- Boutons principaux -->
-    <button class="btn btn-primary mr-2 editable" id="new" onclick="openAddSectionModal()">+ Nouvelle Section</button>
-    <button class="btn btn-info mr-2 editable" id="load" onclick="openUploadModal()">Charger Bookmarks</button>
-    <button class="btn btn-success mr-2 editable" id="download" onclick="downloadBookmarks()">Télécharger Bookmarks</button>
-    <button class="btn btn-danger mr-2 editable" id="delete" onclick="openDeleteAllModal()">Effacer les Bookmarks</button>
-    <!-- Sélection de la langue -->
-    <select id="languageSelect" class="editable" style="height: 25px; margin-right: 10px;">
-      <option value="fr">Français</option>
-      <option value="en">English</option>
-    </select>
-    <!-- Mode édition -->
-    <span id="editModeToggle" class="edit-icon" style="cursor: pointer;">Edition ✏️</span>
+  <!-- Menu burger -->
+  <div class="burger-menu" onclick="toggleBurgerMenu()">☰</div>
+  <div class="burger-menu-content" id="burgerMenuContent">
+    <span id="userGreeting" style="display: none; margin-right: 10px;">Bonjour</span>
+    <a href="javascript:void(0);" id="authLink" onclick="toggleAuthModal()">Connexion</a>
+    <a id="editModeToggle" class="edit-icon" style="cursor: pointer;">Mode Édition</a>
   </div>
-</header>
 
-<!-- Contenu principal -->
-<div class="container mt-3">
-  
+  <!-- Header principal -->
+  <header
+    style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; align-items: center;">
+    <h3 id="title">Bookmarks Manager</h3>
+    <div style="display: flex; align-items: center;">
+      <!-- Boutons principaux -->
+      <button class="btn btn-primary mr-2 editable" id="new" onclick="openAddSectionModal()">+ Nouvelle Section</button>
+      <button class="btn btn-info mr-2 editable" id="load" onclick="openUploadModal()">Charger Bookmarks</button>
+      <button class="btn btn-success mr-2 editable" id="download" onclick="downloadBookmarks()">Télécharger
+        Bookmarks</button>
+      <button class="btn btn-danger mr-2 editable" id="delete" onclick="openDeleteAllModal()">Effacer les
+        Bookmarks</button>
+      <!-- Sélection de la langue -->
+      <select id="languageSelect" class="editable" style="height: 25px; margin-right: 10px;">
+        <option value="fr">Français</option>
+        <option value="en">English</option>
+      </select>
 
-  <!-- Container pour les sections -->
-  <div id="bookmarkContainer" class="row section-container">
-    <!-- Sections chargées dynamiquement ici -->
+    </div>
+  </header>
+
+  <!-- Conteneur principal des bookmarks -->
+  <div class="container mt-3">
+    <div id="bookmarkContainer" class="row section-container"></div>
   </div>
-</div>
 
-<!-- Modal pour l'ajout d'un lien -->
-<div class="modal fade" id="addLinkModal" tabindex="-1" aria-labelledby="addLinkModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addLinkModalLabel">Ajouter un lien</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="addLinkForm">
-          <div class="form-group">
-            <label for="linkTitle">Nom du lien</label>
-            <input type="text" class="form-control" id="linkTitle" required>
-          </div>
-          <div class="form-group">
-            <label for="linkURL">URL</label>
-            <input type="url" class="form-control" id="linkURL" required>
-            <small class="form-text text-muted">L'URL doit être valide (https://...)</small>
-          </div>
-          <input type="hidden" id="currentSectionId">
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-        <button type="button" class="btn btn-primary" onclick="submitLink()">Ajouter le lien</button>
+  <!-- Modales (connexion, inscription, ajout de lien, etc.) -->
+  <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="authModalLabel">Connexion</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="loginForm">
+            <div class="form-group">
+              <label for="username">Nom d'utilisateur</label>
+              <input type="text" class="form-control" id="username" required>
+            </div>
+            <div class="form-group">
+              <label for="password">Mot de passe</label>
+              <input type="password" class="form-control" id="password" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" onclick="login()">Connexion</button>
+          <button type="button" class="btn btn-link" onclick="openSignupModal()">Créer un compte</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
+  <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="signupModalLabel">Créer un compte</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="signupForm">
+            <div class="form-group">
+              <label for="signupUsername">Nom d'utilisateur</label>
+              <input type="text" class="form-control" id="signupUsername" required>
+            </div>
+            <div class="form-group">
+              <label for="signupPassword">Mot de passe</label>
+              <input type="password" class="form-control" id="signupPassword" required>
+            </div>
+            <div class="form-group">
+              <label for="confirmPassword">Confirmer le mot de passe</label>
+              <input type="password" class="form-control" id="confirmPassword" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" onclick="signup()">Créer le compte</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="addLinkModal" tabindex="-1" aria-labelledby="addLinkModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addLinkModalLabel">Ajouter un lien</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="addLinkForm">
+            <div class="form-group">
+              <label for="linkTitle">Nom du lien</label>
+              <input type="text" class="form-control" id="linkTitle" required>
+            </div>
+            <div class="form-group">
+              <label for="linkURL">URL</label>
+              <input type="url" class="form-control" id="linkURL" required>
+              <small class="form-text text-muted">L'URL doit être valide (https://...)</small>
+            </div>
+            <input type="hidden" id="currentSectionId">
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" onclick="submitLink()">Ajouter le lien</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="addSectionModal" tabindex="-1" aria-labelledby="addSectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addSectionModalLabel">Ajouter une section</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="addSectionForm">
+            <div class="form-group">
+              <label for="sectionTitle">Nom de la section</label>
+              <input type="text" class="form-control" id="sectionTitle" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" onclick="submitSection()">Ajouter la section</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="uploadModalLabel">Charger un fichier JSON</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="file" id="jsonFileInput" accept=".json" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" onclick="uploadBookmarks()">Charger</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="deleteAllModal" tabindex="-1" aria-labelledby="deleteAllModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteAllModalLabel">Confirmation de suppression</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Êtes-vous sûr de vouloir supprimer toutes les sections et URL ?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-danger" onclick="deleteAllData()">Confirmer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="editSectionModal" tabindex="-1" aria-labelledby="editSectionModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editSectionModalLabel">Modifier le nom de la section</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="text" class="form-control" id="editSectionTitle" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" onclick="updateSectionTitle()">Sauvegarder</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="editLinkModal" tabindex="-1" aria-labelledby="editLinkModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editLinkModalLabel">Modifier le lien</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="editLinkForm">
+            <div class="form-group">
+              <label for="editLinkTitle">Nom du lien</label>
+              <input type="text" class="form-control" id="editLinkTitle" required>
+            </div>
+            <div class="form-group">
+              <label for="editLinkURL">URL</label>
+              <input type="url" class="form-control" id="editLinkURL" required>
+              <small class="form-text text-muted">L'URL doit être valide (https://...)</small>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" onclick="updateLink()">Sauvegarder</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<!-- Modal pour l'ajout d'une section -->
-<div class="modal fade" id="addSectionModal" tabindex="-1" aria-labelledby="addSectionModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addSectionModalLabel">Ajouter une section</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="addSectionForm">
-          <div class="form-group">
-            <label for="sectionTitle">Nom de la section</label>
-            <input type="text" class="form-control" id="sectionTitle" required>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-        <button type="button" class="btn btn-primary" onclick="submitSection()">Ajouter la section</button>
-      </div>
+  <footer
+    style="position: fixed; bottom: 0; width: 100%; background-color: #f9f9f9; padding: 10px 0; border-top: 1px solid #ddd;">
+    <div class="jira-input-container" style="display: flex; justify-content: center;">
+      <input type="text" id="URL" placeholder="www.google.fr" autofocus>
+      <button class="btn btn-primary ml-2" onclick="redirectToWeb()">Afficher</button>
+      <span class="info-icon" onmouseover="showInfoText()" onmouseout="hideInfoText()">?</span>
+      <div class="info-text" id="infoText">Entrez un URL qui sera ouverte en mode simplifier</div>
     </div>
-  </div>
-</div>
+  </footer>
 
-<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="uploadModalLabel">Charger un fichier JSON</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <input type="file" id="jsonFileInput" accept=".json" />
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-        <button type="button" class="btn btn-primary" onclick="uploadBookmarks()">Charger</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="deleteAllModal" tabindex="-1" aria-labelledby="deleteAllModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="deleteAllModalLabel">Confirmation de suppression</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        Êtes-vous sûr de vouloir supprimer toutes les sections et URL ?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-        <button type="button" class="btn btn-danger" onclick="deleteAllData()">Confirmer</button>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="modal fade" id="editSectionModal" tabindex="-1" aria-labelledby="editSectionModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editSectionModalLabel">Modifier le nom de la section</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <input type="text" class="form-control" id="editSectionTitle" />
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-        <button type="button" class="btn btn-primary" onclick="updateSectionTitle()">Sauvegarder</button>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="modal fade" id="editLinkModal" tabindex="-1" aria-labelledby="editLinkModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editLinkModalLabel">Modifier le lien</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="editLinkForm">
-          <div class="form-group">
-            <label for="editLinkTitle">Nom du lien</label>
-            <input type="text" class="form-control" id="editLinkTitle" required>
-          </div>
-          <div class="form-group">
-            <label for="editLinkURL">URL</label>
-            <input type="url" class="form-control" id="editLinkURL" required>
-            <small class="form-text text-muted">L'URL doit être valide (https://...)</small>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-        <button type="button" class="btn btn-primary" onclick="updateLink()">Sauvegarder</button>
-      </div>
-    </div>
-  </div>
-</div>
-<footer style="position: fixed; bottom: 0; width: 100%; background-color: #f9f9f9; padding: 10px 0; border-top: 1px solid #ddd;">
-  <div class="jira-input-container" style="display: flex; justify-content: center;">
-    <input type="text" id="URL" placeholder="www.google.fr" autofocus>
-    <button class="btn btn-primary ml-2" onclick="redirectToWeb()">Afficher</button>
-    <span class="info-icon" onmouseover="showInfoText()" onmouseout="hideInfoText()">?</span>
-    <div class="info-text" id="infoText">Entrez un URL qui sera ouverte en mode simplifier</div>
-  </div>
-</footer>
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-<script src="database.js"></script>
-<script src="language.js"></script>
-<script src="bookmarks.js"></script>
-<script src="modal.js"></script>
+  <!-- Scripts JavaScript -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+  <script src="database.js"></script>
+  <script src="language.js"></script>
+  <script src="authentification.js"></script>
+  <script src="modal.js"></script>
+  <script src="bookmarks.js"></script>
+  <script src="menu.js"></script>
 </body>
+
 </html>

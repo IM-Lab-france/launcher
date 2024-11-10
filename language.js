@@ -1,77 +1,128 @@
-const translations = {
-    "fr": {
-        "new": "Nouvelle section",
-        "load": "Charger un Bookmark",
-        "download": "Sauvegarder un Bookmark",
-        "delete": "Tout effacer",
-        "infoText": "Entrez une URL pour l'afficher dans cette fenêtre",
-        "title" : "Gestion des signets"
+$(document).ready(function () {
+  const translations = {
+    fr: {
+      new: "Nouvelle section",
+      load: "Charger un Bookmark",
+      download: "Sauvegarder un Bookmark",
+      delete: "Tout effacer",
+      infoText: "Entrez une URL pour l'afficher dans cette fenêtre",
+      title: "Gestion des signets",
     },
-    "en": {
-        "new": "New Section",
-        "load": "Load Bookmark",
-        "download": "Download Bookmark",
-        "delete": "Delete all",
-        "infoText": "Enter URL to display it in this window.",
-        "title" : "Bookmarks Manager"
-    }
-};
+    en: {
+      new: "New Section",
+      load: "Load Bookmark",
+      download: "Download Bookmark",
+      delete: "Delete all",
+      infoText: "Enter URL to display it in this window.",
+      title: "Bookmarks Manager",
+    },
+  };
 
-function saveLanguage(language) {
+  function saveLanguage(language) {
+    if (!db) {
+      console.error(
+        "Base de données non disponible pour sauvegarder la langue."
+      );
+      return;
+    }
+
     const transaction = db.transaction("sectionsStore", "readwrite");
     const objectStore = transaction.objectStore("sectionsStore");
 
-    // Sauvegarder la langue dans un enregistrement distinct
     objectStore.put({ id: "app_language", value: language });
 
-    transaction.oncomplete = function() {
-        console.log("Langue sauvegardée:", language);
+    transaction.oncomplete = function () {
+      console.log("Langue sauvegardée:", language);
     };
 
-    transaction.onerror = function(event) {
-        console.error("Erreur lors de la sauvegarde de la langue:", event.target.errorCode);
+    transaction.onerror = function (event) {
+      console.error(
+        "Erreur lors de la sauvegarde de la langue:",
+        event.target.errorCode
+      );
     };
-}
+  }
 
-function loadDefaultLanguageAndBookmarks() {
+  function loadDefaultLanguageAndBookmarks() {
+    if (!db) {
+      console.error(
+        "Base de données non disponible pour charger la langue et les signets."
+      );
+      return;
+    }
+
     const transaction = db.transaction("sectionsStore", "readonly");
     const objectStore = transaction.objectStore("sectionsStore");
 
-    // Récupérer la langue par défaut
     const requestLang = objectStore.get("app_language");
-    requestLang.onsuccess = function() {
-        const language = requestLang.result ? requestLang.result.value : "fr";
-        document.getElementById('languageSelect').value = language;
-        loadLanguage(language); // Charger la langue par défaut
+    requestLang.onsuccess = function () {
+      const $languageSelect = $("#languageSelect");
+      if (!$languageSelect.length) {
+        console.error("Élément 'languageSelect' introuvable dans le DOM.");
+        return;
+      }
+
+      const language = requestLang.result ? requestLang.result.value : "fr";
+      $languageSelect.val(language);
+      loadLanguage(language);
     };
 
-    // Récupérer les sections
     const requestSections = objectStore.getAll();
-    requestSections.onsuccess = function(event) {
-        bookmarksData.sections = event.target.result.filter(section => section.id !== "app_language");
+    requestSections.onsuccess = function (event) {
+      bookmarksData.sections = event.target.result.filter(
+        (section) => section.id !== "app_language"
+      );
 
-        // S'assurer que chaque section a un tableau `links`
-        bookmarksData.sections.forEach(section => {
-            section.links = section.links || [];
-        });
+      bookmarksData.sections.forEach((section) => {
+        section.links = section.links || [];
+      });
 
-        renderBookmarks();
+      renderBookmarks();
     };
-}
 
-function loadLanguage(language) {
-    document.getElementById('new').innerText = translations[language].new;
-    document.getElementById('load').innerText = translations[language].load;
-    document.getElementById('download').innerText = translations[language].download;
-    document.getElementById('delete').innerText = translations[language].delete;
-    document.getElementById('infoText').innerText = translations[language].infoText;
-    document.getElementById('title').innerText = translations[language].title;
-}
+    requestSections.onerror = function (event) {
+      console.error(
+        "Erreur lors de la récupération des sections:",
+        event.target.errorCode
+      );
+    };
+  }
 
-document.getElementById('languageSelect').addEventListener('change', (event) => {
-    const selectedLanguage = event.target.value;
-    loadLanguage(selectedLanguage);
+  function loadLanguage(language) {
+    const elementsToTranslate = {
+      new: "new",
+      load: "load",
+      download: "download",
+      delete: "delete",
+      infoText: "infoText",
+      title: "title",
+    };
 
-    // Enregistrez la langue sans l'ajouter aux sections
-    saveLanguage(selectedLanguage);
+    $.each(elementsToTranslate, function (key, elementId) {
+      const $element = $(`#${elementId}`);
+      if ($element.length) {
+        $element.text(translations[language][key]);
+      } else {
+        console.warn(`Élément avec l'ID '${elementId}' introuvable.`);
+      }
+    });
+  }
+
+  const checkLanguageSelect = setInterval(() => {
+    const $languageSelect = $("#languageSelect");
+    if ($languageSelect.length) {
+      clearInterval(checkLanguageSelect);
+      $languageSelect.on("change", function () {
+        const selectedLanguage = $(this).val();
+        loadLanguage(selectedLanguage);
+        saveLanguage(selectedLanguage);
+      });
+
+      if (db) {
+        loadDefaultLanguageAndBookmarks();
+      }
+    }
+  }, 100);
+
+  window.loadLanguage = loadLanguage;
 });
