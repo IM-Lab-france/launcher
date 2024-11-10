@@ -1,6 +1,8 @@
 <?php
 require 'config.php';
 
+header('Content-Type: application/json');
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
     $username = $data['username'];
@@ -14,10 +16,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Insérer le nouvel utilisateur dans la base de données
-    $stmt = $pdo->prepare("INSERT INTO users (username, password) VALUES (:username, :password)");
-    $stmt->execute(['username' => $username, 'password' => $password]);
+    // JSON par défaut pour bookmarks_data
+    $defaultBookmarksData = json_encode([
+        [
+            "id" => "section-1731200000001",
+            "title" => "Exemple",
+            "links" => [
+                [
+                    "title" => "Notice Launcher",
+                    "url" => "https://ia.fozzy.fr/launcher/notice.html",
+                    "parentId" => null
+                ],
+                [
+                    "title" => "Perdu",
+                    "url" => "https://www.perdu.com",
+                    "parentId" => null
+                ]
+
+            ],
+            "position" => 0
+        ]
+
+    ]);
+
+    // Insérer le nouvel utilisateur dans la base de données avec bookmarks_data par défaut
+    $stmt = $pdo->prepare("INSERT INTO users (username, password, bookmarks_data) VALUES (:username, :password, :bookmarks_data)");
+    $stmt->execute([
+        'username' => $username,
+        'password' => $password,
+        'bookmarks_data' => $defaultBookmarksData
+    ]);
 
     echo json_encode(['success' => true, 'message' => 'Compte créé avec succès']);
 }
-?>
