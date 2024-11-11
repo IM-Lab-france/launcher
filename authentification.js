@@ -1,6 +1,7 @@
 $(document).ready(function () {
   window.token = localStorage.getItem("jwtToken") || null;
   let username = localStorage.getItem("username") || null;
+  window.accountCreated = false; // Indicateur pour suivre la création de compte
 
   // Affiche le message de bienvenue pour l'utilisateur connecté
   function displayWelcomeMessage(username) {
@@ -33,11 +34,27 @@ $(document).ready(function () {
       userGreeting.textContent = `🧑‍💻 ${username}`;
       authLink.innerHTML = "🔓 Déconnexion";
       authLink.onclick = logout;
+      enableEditMode();
     } else {
       userGreeting.style.display = "none";
       authLink.innerHTML = "🔒 Connexion";
       authLink.onclick = toggleAuthModal;
+      disableEditMode();
     }
+  }
+
+  // Active le mode édition et affiche les boutons d'édition
+  function enableEditMode() {
+    $("#editModeToggle").show(); // Affiche le bouton de mode édition
+    $(".editable").show(); // Affiche les éléments marqués pour le mode édition
+    $("body").addClass("edit-mode"); // Ajoute une classe pour indiquer que le mode édition est actif
+  }
+
+  // Désactive le mode édition et masque les boutons d'édition
+  function disableEditMode() {
+    $("#editModeToggle").hide(); // Cache le bouton de mode édition
+    $(".editable").hide(); // Cache les éléments marqués pour le mode édition
+    $("body").removeClass("edit-mode"); // Retire la classe mode édition
   }
 
   // Vérifie la validité du jeton au chargement de la page et affiche un log
@@ -100,12 +117,12 @@ $(document).ready(function () {
   function logout() {
     localStorage.removeItem("jwtToken");
     localStorage.removeItem("username");
+    localStorage.removeItem("isEditMode"); // Supprime le mode édition
     window.token = null;
-    window.bookmarksData.sections = [];
-    renderBookmarks();
-    $("#authLink").text("Connexion");
-    $("#userGreeting").hide();
-    updateAuthUI();
+    isEditMode = false; // Assure que le mode édition est désactivé
+    disableEditMode(); // Désactive le mode édition visuellement
+
+    location.reload();
   }
 
   function openSignupModal() {
@@ -136,6 +153,7 @@ $(document).ready(function () {
         "success"
       );
       $("#signupModal").modal("hide");
+      window.accountCreated = true; // Indique qu'un compte a été créé
       $("#authModal").modal("show");
     } else {
       showToast(
@@ -163,7 +181,22 @@ $(document).ready(function () {
   window.openSignupModal = openSignupModal;
   window.signup = signup;
 
+  const token = localStorage.getItem("jwtToken");
+
+  // Si aucun utilisateur n'est connecté, afficher la modale de connexion
+  if (!token) {
+    $("#authModal").modal("show"); // Affiche la modale de connexion
+  }
+
   // Appel de la vérification du jeton lors du chargement de la page
   checkTokenValidity();
   updateAuthUI();
+
+  // Affiche la modale de connexion si la modale de création de compte est fermée sans action
+  $("#signupModal").on("hidden.bs.modal", function () {
+    if (!window.accountCreated) {
+      // Vérifie si un compte n'a pas été créé
+      $("#authModal").modal("show"); // Réaffiche la modale de connexion
+    }
+  });
 });

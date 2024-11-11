@@ -11,13 +11,29 @@ $(document).ready(function () {
   });
 
   function redirectToWeb() {
-    const urlInput = $("#URL").val().trim();
-    const url =
-      urlInput.startsWith("http://") || urlInput.startsWith("https://")
+    const urlInput = $("#search").val().trim();
+
+    // Vérifie si l'entrée est une URL (avec ou sans 'http'/'https')
+    const isUrl =
+      urlInput.startsWith("http://") ||
+      urlInput.startsWith("https://") ||
+      /^[\w-]+\.\w+/.test(urlInput);
+    const url = isUrl
+      ? urlInput.startsWith("http://") || urlInput.startsWith("https://")
         ? urlInput
-        : `https://${urlInput}`;
+        : `https://${urlInput}`
+      : `https://www.google.com/search?q=${encodeURIComponent(urlInput)}`; // Remplace 'google.com' par un autre moteur si besoin
+
     window.location.href = url;
   }
+
+  $("#search").on("keydown", function (event) {
+    // Vérifie si la touche pressée est Entrée (code 13)
+    if (event.key === "Enter") {
+      event.preventDefault(); // Empêche l'action par défaut du formulaire si besoin
+      redirectToWeb(); // Appelle la fonction de redirection
+    }
+  });
 
   function showToast(message) {
     const $toast = $("<div>").addClass("toast").text(message);
