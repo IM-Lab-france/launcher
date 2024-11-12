@@ -20,11 +20,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $defaultBookmarksData = json_encode([
         [
             "id" => "section-1731200000001",
-            "title" => "Exemple",
+            "title" => "First one",
             "links" => [
                 [
                     "title" => "Notice Launcher",
                     "url" => "https://ia.fozzy.fr/launcher/notice.html",
+                    "parentId" => null
+                ],
+                [
+                    "title" => "Démineur Online",
+                    "url" => "https://fozzy.fr/",
+                    "parentId" => null
+                ],
+                [
+                    "title" => "Where is Bryan",
+                    "url" => "https://ia.fozzy.fr/whereIsBryan/whereIsBryan/",
                     "parentId" => null
                 ],
                 [
