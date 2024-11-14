@@ -9,6 +9,134 @@ body {
   /* Ajustez la valeur selon votre préférence */
 }
 
+header {
+  position: fixed;
+  /* Fixe le header en haut */
+  top: 0;
+  left: 0;
+  width: 100%;
+  /* Occupe toute la largeur de la page */
+  background-color: #ffffff;
+  /* Couleur du fond, ajustez selon votre thème */
+  /*box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);*/
+  /* Légère ombre pour le relief */
+  z-index: 1000;
+  /* Assure que le header est au-dessus des autres éléments */
+}
+
+#favorisBar {
+  position: fixed;
+  top: 39px;
+  left: 0;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 1);
+  padding: 0px;
+  border-radius: 0 0 8px 8px;
+  /* Arrondit uniquement les coins inférieurs */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.favori-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  padding: 5px 0px 0px 13px;
+}
+
+.favori-item {
+  position: relative;
+}
+
+.favori-item[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 125%;
+  /* Place l'infobulle au-dessus de l'élément */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(60, 60, 60, 0.9);
+  /* Fond sombre mais légèrement transparent */
+  color: #f0f0f0;
+  /* Texte légèrement gris */
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85em;
+  white-space: nowrap;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  /* Ajoute une ombre douce */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 10;
+}
+
+.favori-item[title]:hover::after {
+  opacity: 1;
+  transform: translate(-50%, -5px);
+  /* Légère animation vers le haut */
+}
+
+.favori-item[title]:hover::before {
+  content: "";
+  position: absolute;
+  bottom: 115%;
+  /* Ajuste la position de la flèche */
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(60, 60, 60, 0.9) transparent transparent transparent;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.favori-item[title]:hover::before {
+  opacity: 1;
+}
+
+.favori-icon {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 20%;
+  background-color: #ddd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.detach-icon {
+  position: relative;
+  top: 15px;
+  right: -33px;
+  cursor: pointer;
+  color: red;
+  font-size: 12px;
+  background: white;
+  border-radius: 50%;
+}
+
+.favori-title {
+  font-size: 8px;
+  text-align: center;
+  margin-top: -1px;
+}
+
+.container {
+  margin-top: 160px;
+  padding: 15px;
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
 #wallpaperContainer img {
   width: 80px;
   height: 80px;
@@ -105,6 +233,7 @@ body {
 
 .section-container {
   min-height: 200px;
+  padding-bottom: 40px;
 }
 
 #languageSelect {

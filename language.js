@@ -141,8 +141,6 @@ $(document).ready(function () {
   function loadLanguage(language) {
     const elementsToTranslate = {
       new: "new",
-      load: "load",
-      download: "download",
       delete: "delete",
       infoText: "infoText",
       title: "title",

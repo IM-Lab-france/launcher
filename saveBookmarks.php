@@ -1,4 +1,5 @@
 <?php
+// saveBookmarks.php
 require 'config.php';
 require 'vendor/autoload.php';
 
@@ -11,7 +12,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Récupérer les données JSON envoyées par le client
     $data = json_decode(file_get_contents('php://input'), true);
     $token = $data['token'] ?? null;
-    $bookmarksData = json_encode($data['bookmarks'] ?? []);
+    // Récupérer bookmarks et favoris séparément
+    $bookmarks = $data['bookmarks']['bookmarks'] ?? [];
+    $favoris = $data['bookmarks']['favoris'] ?? [];
+
+    $bookmarksData = json_encode([
+        'bookmarks' => $bookmarks,
+        'favoris' => $favoris
+    ]);
 
     if (!$token) {
         echo json_encode(['success' => false, 'message' => 'Jeton d\'authentification manquant.']);

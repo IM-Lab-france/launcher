@@ -14,8 +14,8 @@
 <body>
   <div id="backgroundOverlay"></div>
   <!-- Menu burger -->
-  <div class="burger-menu" onclick="toggleBurgerMenu()">☰</div>
-  <div class="burger-menu-content" id="burgerMenuContent">
+  <div class="burger-menu" style="z-index: 9998;" onclick="toggleBurgerMenu()">☰</div>
+  <div class="burger-menu-content" style="z-index: 9998;" id="burgerMenuContent">
     <span id="userGreeting" style="display: none; margin-right: 10px;">Hello</span>
     <a href="javascript:void(0);" id="authLink" onclick="toggleAuthModal()">🔒 Connexion</a>
     <a id="editModeToggle" class="edit-icon" style="cursor: pointer;">✏️ Mode Édition</a>
@@ -42,34 +42,29 @@
 
   <!-- Header principal -->
   <header
-    style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; align-items: center;background-color: #f9f9f9;">
-    <h1 id="title" style="font-size: clamp(1.5rem, 3vw, 2.5rem);">Bookmarks Manager</h1>
+    style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; align-items: center; background-color: #f9f9f9; position: fixed; top: 0; left: 0; width: 100%; z-index: 1001;">
+    <h1 id="title" style="font-size: clamp(1.5rem, 3vw, 2.5rem); margin: 0;">Bookmarks Manager</h1>
     <div style="display: flex; align-items: center; position: relative; right: 26px;">
       <!-- Boutons principaux -->
       <button class="btn btn-primary mr-2 editable" id="new" onclick="openAddSectionModal()">
         <span class="btn-icon">➕</span>
         <span class="btn-text">Nouvelle Section</span>
       </button>
-      <button class="btn btn-info mr-2 editable" id="load" onclick="openUploadModal()">
-        <span class="btn-icon">📂</span>
-        <span class="btn-text">Charger Bookmarks</span>
-      </button>
-      <button class="btn btn-success mr-2 editable" id="download" onclick="downloadBookmarks()">
-        <span class="btn-icon">⬇️</span>
-        <span class="btn-text">Télécharger Bookmarks</span>
-      </button>
+
+
       <button class="btn btn-danger mr-2 editable" id="delete" onclick="openDeleteAllModal()">
         <span class="btn-icon">🗑️</span>
         <span class="btn-text">Effacer les Bookmarks</span>
       </button>
-
-
-
     </div>
   </header>
 
+  <!-- Bookmarks favoris -->
+  <div id="favorisBar" class="d-flex justify-content-center align-items-center mt-3 mb-3">
+  </div>
+  <div id="spacer" style="height: 160px;"></div> <!-- div intermédiaire pour espacement -->
   <!-- Conteneur principal des bookmarks -->
-  <div class="container mt-3">
+  <div class="container mt-5" style="margin-top: 160px;">
     <div id="bookmarkContainer" class="row section-container"></div>
   </div>
 
@@ -210,25 +205,7 @@
       </div>
     </div>
   </div>
-  <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="uploadModalLabel">Charger un fichier JSON</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <input type="file" id="jsonFileInput" accept=".json" />
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-          <button type="button" class="btn btn-primary" onclick="uploadBookmarks()">Charger</button>
-        </div>
-      </div>
-    </div>
-  </div>
+
   <div class="modal fade" id="deleteAllModal" tabindex="-1" aria-labelledby="deleteAllModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">

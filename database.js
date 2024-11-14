@@ -32,35 +32,7 @@ $(document).ready(function () {
 
   window.initDB = initDB; // Expose initDB globalement
 
-  async function saveBookmarksToServer() {
-    const token = localStorage.getItem("jwtToken"); // Récupérer le jeton JWT
-    if (!token) {
-      console.error("Token JWT manquant.");
-      return;
-    }
-
-    await fetch("saveBookmarks.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        token: token, // Envoyer le jeton dans le corps de la requête
-        bookmarks: window.bookmarksData.sections, // Inclure les données des signets
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          console.log("Signets sauvegardés avec succès.");
-        } else {
-          console.error(
-            data.message || "Erreur lors de la sauvegarde des signets."
-          );
-        }
-      })
-      .catch((error) => console.error("Erreur de réseau :", error));
-  }
+  // Fonction pour sauvegarder les signets sur le serveur
 
   function saveSection(section) {
     if (!db) {
@@ -77,12 +49,12 @@ $(document).ready(function () {
 
     transaction.oncomplete = function () {
       console.log("Section sauvegardée:", section);
-      if (typeof renderBookmarks === "function") {
-        renderBookmarks();
-      }
 
       if (window.token) {
         saveBookmarksToServer();
+      }
+      if (typeof renderBookmarks === "function") {
+        renderBookmarks();
       }
     };
 
@@ -211,7 +183,7 @@ $(document).ready(function () {
           window.bookmarksData.sections = data.bookmarks || [];
 
           // Stocker les données reçues dans IndexedDB
-          saveDataToLocalDB(window.bookmarksData.sections);
+          saveDataToLocalDB(window.bookmarksData);
 
           // Appeler `renderBookmarks` pour afficher les signets
           renderBookmarks();
@@ -225,13 +197,15 @@ $(document).ready(function () {
   }
 
   // Fonction pour sauvegarder les données dans IndexedDB
-  function saveDataToLocalDB(sections) {
+  function saveDataToLocalDB(sectionsData) {
     if (!db) {
       console.error(
         "Base de données non disponible pour sauvegarder les signets."
       );
       return;
     }
+
+    const sections = sectionsData.bookmarks || []; // Utilise `bookmarks` pour accéder aux sections
 
     const transaction = db.transaction("sectionsStore", "readwrite");
     const objectStore = transaction.objectStore("sectionsStore");

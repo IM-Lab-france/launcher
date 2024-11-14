@@ -3,6 +3,106 @@ $(document).ready(function () {
   let currentLinkIndex;
   let isEditMode = localStorage.getItem("isEditMode") === "true";
 
+  window.favorisData = [];
+
+  // Fonction pour ajouter un favori
+  function addFavori(link) {
+    if (!window.favorisData.includes(link)) {
+      window.favorisData.push(link);
+      renderFavoris();
+      saveBookmarksToServer();
+      adjustSpacerHeight();
+    }
+  }
+
+  // Fonction pour retirer un favori
+  function removeFavori(link) {
+    window.favorisData = window.favorisData.filter(
+      (fav) => fav.url !== link.url
+    );
+    renderFavoris();
+    saveBookmarksToServer();
+    adjustSpacerHeight();
+  }
+
+  // Fonction pour afficher les favoris
+  function renderFavoris() {
+    const favorisBar = document.getElementById("favorisBar");
+    favorisBar.innerHTML = ""; // Vide l'affichage des favoris actuels
+
+    window.favorisData.forEach((link, index) => {
+      const favoriItem = document.createElement("div");
+      favoriItem.className = "favori-item";
+      favoriItem.draggable = true;
+
+      favoriItem.onclick = () => {
+        window.location.href = link.url;
+      };
+      favoriItem.style.cursor = "pointer"; // Changer le curseur pour pointer
+
+      favoriItem.title = link.title;
+
+      // Gestion du glisser-déposer pour l'organisation
+      favoriItem.addEventListener("dragstart", (event) => {
+        event.dataTransfer.setData("text/plain", index);
+      });
+      favoriItem.addEventListener("drop", (event) => {
+        event.preventDefault();
+        const draggedIndex = event.dataTransfer.getData("text/plain");
+        const [draggedFavori] = window.favorisData.splice(draggedIndex, 1);
+        window.favorisData.splice(index, 0, draggedFavori);
+        renderFavoris();
+        saveBookmarksToServer();
+      });
+      favoriItem.addEventListener("dragover", (event) =>
+        event.preventDefault()
+      );
+
+      // Icone de favori (favicon de l'URL)
+      const icon = document.createElement("div");
+      icon.className = "favori-icon";
+
+      // Ajout de l'icône de suppression en haut de l'image
+
+      const detachIcon = document.createElement("span");
+      detachIcon.innerText = "❌";
+      detachIcon.className = "detach-icon editable"; // Classe pour positionnement
+      detachIcon.onclick = () => removeFavori(link);
+      icon.appendChild(detachIcon);
+
+      const favicon = document.createElement("img");
+      favicon.src = `https://www.google.com/s2/favicons?sz=32&domain=${
+        new URL(link.url).hostname
+      }`;
+      favicon.alt = link.title;
+      favicon.onerror = () => (favicon.style.display = "none"); // Cache l'image si elle ne se charge pas
+      icon.appendChild(favicon);
+
+      // Titre du favori avec limite de caractères
+      const title = document.createElement("div");
+      title.className = "favori-title";
+      title.innerText =
+        link.title.length > 9 ? link.title.slice(0, 9) + "..." : link.title;
+
+      favoriItem.appendChild(icon);
+      favoriItem.appendChild(title);
+      favorisBar.appendChild(favoriItem);
+    });
+  }
+
+  // Fonction pour attacher/détacher un lien dans les favoris
+  function toggleFavori(sectionId, linkIndex) {
+    const section = window.bookmarksData.sections.find(
+      (s) => s.id === sectionId
+    );
+    const link = section.links[linkIndex];
+    if (window.favorisData.find((fav) => fav.url === link.url)) {
+      removeFavori(link);
+    } else {
+      addFavori(link);
+    }
+  }
+
   // Gestion du bouton de bascule pour le mode édition
   $("#editModeToggle").on("click", function () {
     isEditMode = !isEditMode;
@@ -65,75 +165,6 @@ $(document).ready(function () {
     );
   }
 
-  toggleEditModeDisplay();
-
-  function uploadBookmarks() {
-    const fileInput = $("#jsonFileInput")[0];
-    if (fileInput.files.length > 0) {
-      const file = fileInput.files[0];
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        const data = JSON.parse(event.target.result);
-
-        if (data.sections && data.language) {
-          window.bookmarksData.sections = data.sections;
-          saveData();
-          renderBookmarks();
-
-          const transaction = db.transaction("sectionsStore", "readwrite");
-          const objectStore = transaction.objectStore("sectionsStore");
-          objectStore.put({ id: "language", value: data.language });
-
-          $("#languageSelect").val(data.language);
-          loadLanguage(data.language);
-
-          $("#uploadModal").modal("hide");
-        } else {
-          alert(
-            "Fichier JSON invalide. Assurez-vous qu'il contient les champs 'language' et 'sections'."
-          );
-        }
-      };
-      reader.readAsText(file);
-    } else {
-      alert("Veuillez sélectionner un fichier JSON.");
-    }
-  }
-
-  function downloadBookmarks() {
-    const transaction = db.transaction("sectionsStore", "readonly");
-    const objectStore = transaction.objectStore("sectionsStore");
-
-    const requestLang = objectStore.get("app_language");
-    requestLang.onsuccess = function () {
-      const language = requestLang.result ? requestLang.result.value : "fr";
-
-      const sections = window.bookmarksData.sections.map((section) => ({
-        id: section.id,
-        title: section.title,
-        links: section.links || [],
-        position: section.position || 0,
-      }));
-
-      const exportData = { language: language, sections: sections };
-
-      const dataStr = JSON.stringify(exportData, null, 2);
-      const blob = new Blob([dataStr], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-
-      const link = $("<a>")
-        .attr({
-          href: url,
-          download: "bookmarks.json",
-        })
-        .appendTo("body");
-      link[0].click();
-      link.remove();
-
-      URL.revokeObjectURL(url);
-    };
-  }
-
   function saveSectionOrder() {
     // Mettre à jour la position de chaque section dans bookmarksData
     $("#bookmarkContainer .bookmark-section").each(function (index) {
@@ -150,13 +181,36 @@ $(document).ready(function () {
     saveBookmarksToServer();
   }
 
-  function renderBookmarks() {
-    $("#bookmarkContainer").empty();
+  function renderBookmarks(
+    bookmarksData = {
+      bookmarks: window.bookmarksData.sections,
+      favoris: window.favorisData,
+    }
+  ) {
+    // Vérification et assignation de la structure correcte
+    const sectionsData = bookmarksData.bookmarks
+      ? bookmarksData.bookmarks.bookmarks
+      : window.bookmarksData.sections;
+    const favorisData = bookmarksData.bookmarks
+      ? bookmarksData.bookmarks.favoris
+      : window.favorisData;
 
+    // Charger les sections et favoris depuis les données passées ou les valeurs globales
+    window.bookmarksData.sections = Array.isArray(sectionsData)
+      ? sectionsData
+      : [];
+    window.favorisData = Array.isArray(favorisData) ? favorisData : [];
+
+    // Rendu de la barre de favoris
+    renderFavoris();
+
+    // Trier les sections en fonction de leur position
     window.bookmarksData.sections.sort(
       (a, b) => (a.position || 0) - (b.position || 0)
     );
-
+    // Vider le conteneur de bookmarks
+    $("#bookmarkContainer").empty();
+    // Rendu de chaque section
     window.bookmarksData.sections.forEach((section) => {
       const sectionHtml = `
             <div class="col-lg-4 col-md-6 col-sm-12 mb-4 bookmark-section" id="${
@@ -177,45 +231,48 @@ $(document).ready(function () {
                     ${section.links
                       .map(
                         (link, index) => `
-                        <li class="list-group-item d-flex justify-content-between align-items-center" data-index="${index}" data-parent-id="${
+<li class="list-group-item d-flex justify-content-between align-items-center" data-index="${index}" data-parent-id="${
                           link.parentId || ""
-                        }"
-                            style="padding-left: ${link.paddingLeft || 0}px;">
-                            <div class="d-flex align-items-center">
-                                <img src="https://www.google.com/s2/favicons?sz=32&domain=${
-                                  new URL(link.url).hostname
-                                }" 
-                                     alt="favicon" style="width: 16px; height: 16px; margin-right: 5px;" 
-                                     onerror="this.style.display='none'">
-                                <a href="${
-                                  link.url
-                                }" style="text-decoration: none;">${
-                          link.title
-                        }</a>
-                            </div>
-                            <div>
-                                <span class="arrow-icon editable" onclick="moveLeft('${
-                                  section.id
-                                }', ${index})">⬅️</span>
-                                <span class="arrow-icon editable" onclick="moveRight('${
-                                  section.id
-                                }', ${index})">➡️</span>
-                                <span class="edit-icon ml-2 editable" onclick="openEditLinkModal('${
-                                  section.id
-                                }', ${index})">✏️</span>
-                                <span class="delete-icon editable" onclick="deleteLink('${
-                                  section.id
-                                }', '${link.title}')">🗑️</span>
-                            </div>
-                        </li>`
+                        }">
+    <div class="d-flex align-items-center">
+        <img src="https://www.google.com/s2/favicons?sz=32&domain=${
+          new URL(link.url).hostname
+        }" 
+            alt="favicon" style="width: 16px; height: 16px; margin-right: 5px;" 
+            onerror="this.style.display='none'">
+        <a href="${link.url}" style="text-decoration: none;">${link.title}</a>
+    </div>
+    <div>
+        <span class="arrow-icon editable" onclick="moveLeft('${
+          section.id
+        }', ${index})">⬅️</span>
+        <span class="arrow-icon editable" onclick="moveRight('${
+          section.id
+        }', ${index})">➡️</span>
+        <span class="edit-icon ml-2 editable" onclick="openEditLinkModal('${
+          section.id
+        }', ${index})">✏️</span>
+        <span class="delete-icon editable" onclick="deleteLink('${
+          section.id
+        }', '${link.title}')">🗑️</span>
+        <span class="favorite-icon" onclick="toggleFavori('${
+          section.id
+        }', ${index})">${
+                          window.favorisData.find((fav) => fav.url === link.url)
+                            ? "🟢"
+                            : "⚫"
+                        }</span>
+    </div>
+</li>`
                       )
                       .join("")}
+
                 </ul>
             </div>`;
       $("#bookmarkContainer").append(sectionHtml);
     });
 
-    // Initialisation du tri
+    // Initialisation du tri pour les sections et les liens
     $("#bookmarkContainer").sortable({
       handle: ".bookmark-title",
       update: function () {
@@ -236,11 +293,8 @@ $(document).ready(function () {
     });
 
     toggleEditModeDisplay();
+    adjustSpacerHeight();
   }
-
-  // Expose renderBookmarks globalement
-
-  renderBookmarks();
 
   // Mettre à jour l'ordre des sections dans la base de données
   function updateSectionOrder() {
@@ -273,10 +327,20 @@ $(document).ready(function () {
   // Fonction pour sauvegarder les signets sur le serveur
   async function saveBookmarksToServer() {
     const token = localStorage.getItem("jwtToken"); // Récupérer le jeton JWT
+    console.log(
+      "Données des signets avant envoi au serveur:",
+      window.bookmarksData.sections
+    );
     if (!token) {
       console.error("Token JWT manquant.");
       return;
     }
+
+    // Inclure les favoris dans les données des signets
+    const bookmarksDataWithFavoris = {
+      bookmarks: window.bookmarksData.sections,
+      favoris: window.favorisData, // Ajouter les favoris
+    };
 
     await fetch("saveBookmarks.php", {
       method: "POST",
@@ -285,13 +349,14 @@ $(document).ready(function () {
       },
       body: JSON.stringify({
         token: token, // Envoyer le jeton dans le corps de la requête
-        bookmarks: window.bookmarksData.sections, // Inclure les données des signets
+        bookmarks: bookmarksDataWithFavoris, // Inclure les données des signets
       }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
           console.log("Signets sauvegardés avec succès.");
+          loadServerBookmarks();
         } else {
           console.error(
             data.message || "Erreur lors de la sauvegarde des signets."
@@ -439,6 +504,17 @@ $(document).ready(function () {
     saveSection(section);
   }
 
+  function adjustSpacerHeight() {
+    const favorisBar = document.getElementById("favorisBar");
+    const spacer = document.getElementById("spacer");
+    spacer.style.height = `${favorisBar.offsetHeight + 15}px`;
+  }
+
+  renderFavoris(); // Afficher les favoris au chargement
+  renderBookmarks();
+  toggleEditModeDisplay();
+  adjustSpacerHeight();
+
   window.deleteSection = deleteSection;
   window.deleteLink = deleteLink;
   window.saveBookmarksToServer = saveBookmarksToServer;
@@ -451,6 +527,6 @@ $(document).ready(function () {
   window.updateSectionOrder = updateSectionOrder;
   window.redirectToWeb = redirectToWeb;
   window.showToast = showToast;
-  window.uploadBookmarks = uploadBookmarks;
-  window.downloadBookmarks = downloadBookmarks;
+
+  window.toggleFavori = toggleFavori;
 });
