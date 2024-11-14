@@ -367,32 +367,14 @@ $(document).ready(function () {
   }
 
   function deleteSection(sectionId) {
-    const transaction = db.transaction("sectionsStore", "readwrite");
-    const objectStore = transaction.objectStore("sectionsStore");
-
-    objectStore.delete(sectionId);
-
-    transaction.oncomplete = function () {
-      console.log("Section supprimée:", sectionId);
-
-      // Mettre à jour les sections dans `bookmarksData`
-      window.bookmarksData.sections = window.bookmarksData.sections.filter(
-        (section) => section.id !== sectionId
-      );
-
-      // Charger les signets mis à jour dans l'affichage
-      renderBookmarks();
-
-      // Envoyer les signets au serveur
-      saveBookmarksToServer();
-    };
-
-    transaction.onerror = function (event) {
-      console.error(
-        "Erreur lors de la suppression de la section:",
-        event.target.errorCode
-      );
-    };
+    // Supprimer la section de `bookmarksData`
+    window.bookmarksData.sections = window.bookmarksData.sections.filter(
+      (section) => section.id !== sectionId
+    );
+    // Sauvegarder les changements sur le serveur
+    saveBookmarksToServer();
+    // Actualiser l'affichage des signets
+    renderBookmarks();
   }
 
   function submitLink() {
