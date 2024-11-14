@@ -507,7 +507,7 @@ $(document).ready(function () {
   function adjustSpacerHeight() {
     const favorisBar = document.getElementById("favorisBar");
     const spacer = document.getElementById("spacer");
-    spacer.style.height = `${favorisBar.offsetHeight + 15}px`;
+    spacer.style.height = `${favorisBar.offsetHeight + 5}px`;
   }
 
   renderFavoris(); // Afficher les favoris au chargement
