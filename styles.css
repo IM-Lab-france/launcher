@@ -163,6 +163,20 @@ header {
   z-index: -1;
 }
 
+
+.external-link {
+  margin-left: 10px;
+  font-size: 10px;
+}
+
+.external-link,
+.favorite-icon,
+.arrow-icon,
+.edit-icon {
+  cursor: pointer;
+  /* Change le curseur en une main */
+}
+
 .editable {
   display: none;
 }

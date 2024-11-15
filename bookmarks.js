@@ -235,14 +235,19 @@ $(document).ready(function () {
                           link.parentId || ""
                         }">
     <div class="d-flex align-items-center">
+    <a href="${link.url}" style="text-decoration: none;">
         <img src="https://www.google.com/s2/favicons?sz=32&domain=${
           new URL(link.url).hostname
         }" 
             alt="favicon" style="width: 16px; height: 16px; margin-right: 5px;" 
             onerror="this.style.display='none'">
-        <a href="${link.url}" style="text-decoration: none;">${link.title}</a>
+        ${link.title}</a>
     </div>
+    
     <div>
+        
+
+
         <span class="arrow-icon editable" onclick="moveLeft('${
           section.id
         }', ${index})">⬅️</span>
@@ -261,7 +266,9 @@ $(document).ready(function () {
                           window.favorisData.find((fav) => fav.url === link.url)
                             ? "🟢"
                             : "⚫"
-                        }</span>
+                        }</span><span class="external-link" onclick="ouvrirFenetreModale('${
+                          link.url
+                        }')"><i class="fas fa-external-link-alt"></i></span>
     </div>
 </li>`
                       )
@@ -296,6 +303,13 @@ $(document).ready(function () {
     adjustSpacerHeight();
   }
 
+  function ouvrirFenetreModale(url) {
+    window.open(
+      url,
+      "_blank",
+      "toolbar=no,scrollbars=yes,resizable=yes,top=100,left=100,width=800,height=600"
+    );
+  }
   // Mettre à jour l'ordre des sections dans la base de données
   function updateSectionOrder() {
     $("#bookmarkContainer .bookmark-section").each(function (index) {
@@ -509,6 +523,7 @@ $(document).ready(function () {
   window.updateSectionOrder = updateSectionOrder;
   window.redirectToWeb = redirectToWeb;
   window.showToast = showToast;
+  window.ouvrirFenetreModale = ouvrirFenetreModale;
 
   window.toggleFavori = toggleFavori;
 });
